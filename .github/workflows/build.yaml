@@ -45,7 +45,7 @@ jobs:
         id: php
         uses: docker/build-push-action@v5
         with:
-          context: php-net
+          context: php
           push: false
           tags: ex2-php:test
           labels: test
