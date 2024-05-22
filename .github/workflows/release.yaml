@@ -39,7 +39,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/ex2-php          
 
-      - name: Build and push Docker image
+      - name: Build and push Docker PHP with App image
         id: push
         uses: docker/build-push-action@v5
         with:
@@ -56,7 +56,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/ex2-nginx
 
-      - name: Build and push Docker image
+      - name: Build and push Docker NGINX image
         id: push-nginx
         uses: docker/build-push-action@v5
         with:
@@ -65,3 +65,4 @@ jobs:
           tags: ${{ steps.meta-nginx.outputs.tags }}
           platforms: linux/amd64,linux/arm64
           labels: ${{ steps.meta-nginx.outputs.labels }}
+
