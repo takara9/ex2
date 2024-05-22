@@ -1,0 +1,76 @@
+name: Branch を Push したらイメージをビルドする
+
+on:
+  push:
+    branches:
+      - '*'         # matches every branch that doesn't contain a '/'
+      - '*/*'       # matches every branch containing a single '/'
+      - '**'        # matches every branch
+      - '!main'     # excludes main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-test-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      #- name: Set up QEMU
+      #  uses: docker/setup-qemu-action@v3
+      #- name: Set up Docker Buildx
+      #  uses: docker/setup-buildx-action@v3
+
+      #- name: Log in to the Container registry
+      #  uses: docker/login-action@v3
+      #  with:
+      #    registry: ${{ env.REGISTRY }}
+      #    username: ${{ github.actor }}
+      #    password: ${{ secrets.GITHUB_TOKEN }}
+
+      #- name: Extract metadata (tags, labels) for Docker
+      #  id: meta
+      #  uses: docker/metadata-action@v5
+      #  with:
+      #    images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build a PHP image 
+        id: php
+        uses: docker/build-push-action@v5
+        with:
+          context: php-net
+          push: false
+          tags: ex2-php:test
+          labels: test
+
+      - name: Build a NGINX image 
+        id: nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: nginx
+          push: false
+          tags: ex2-nginx:test
+          labels: test
+
+      - name: Start a container from the image
+        run: |
+          docker images
+          docker network create --driver bridge php-net
+          docker run -d -v ${PWD}/html:/usr/share/nginx/html --network=php-net --name php-fpm ex2-php:test
+          docker run -d -v ${PWD}/html:/usr/share/nginx/html --network=php-net --publish 9200:9200 --name nginx ex2-nginx:test
+
+      - name: Test the container
+        run: |
+          sleep 5
+          curl --silent --retry 3 --include  http://127.0.0.1:9200/ | grep "200 OK" 
+          [ $? -ne 0 ] && (echo "error"; exit 1)
+
+          exit 0
+
