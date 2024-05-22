@@ -84,7 +84,7 @@ $ git branch -d update_branch
 ここで付与するTAGはコンテナイメージのタグになるので、リポジトリを確認して、タグ名を決めること。
 
 ```
-TAG=1.6
+TAG=1.x
 $ git tag -a $TAG -m "version $TAG"
 $ git push origin $TAG
 ```
