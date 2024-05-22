@@ -50,14 +50,14 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
       
       - name: Extract metadata (tags, labels) for NGINX container
-        id: meta
+        id: meta-nginx
         uses: docker/metadata-action@v5
         with:
           images: |
             ${{ env.REGISTRY }}/ex2-nginx
 
       - name: Build and push Docker image
-        id: push
+        id: push-nginx
         uses: docker/build-push-action@v5
         with:
           context: nginx
